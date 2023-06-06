@@ -28,3 +28,23 @@ class Room(TimeStampModel):
         return self.name
 
 
+class Resident(models.Model):
+    name = models.CharField(max_length=120, verbose_name=_("Name"))
+
+    def __str__(self):
+        return self.name
+
+
+class RoomBooking(models.Model):
+    resident = models.ForeignKey(Resident, on_delete=models.CASCADE, related_name="room_bookings", null=True, blank=True)
+    room = models.ForeignKey(Room, on_delete=models.CASCADE, related_name="room_bookings")
+    start = models.DateTimeField()
+    end = models.DateTimeField()
+    booked = models.BooleanField(default=False)
+
+    class Meta:
+        verbose_name = _("Room Book")
+        verbose_name_plural = _("Room Books")
+
+    def __str__(self):
+        return self.room.name

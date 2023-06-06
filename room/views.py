@@ -1,11 +1,11 @@
 from rest_framework.response import Response
-from rest_framework.generics import ListAPIView, RetrieveAPIView
+from rest_framework.generics import ListAPIView, RetrieveAPIView, CreateAPIView
 from rest_framework.filters import SearchFilter
-
+from django.db.models import Q
 from django_filters.rest_framework import DjangoFilterBackend
 
-from .serializers import RoomListSerializer
-from .models import Room
+from .serializers import RoomListSerializer, RoomBookingListSerializer, RoomBookingCreateSerializer
+from .models import Room, RoomBooking
 from .paginations import CustomPagination
 
 
@@ -48,4 +48,25 @@ class RoomDetailApiView(RetrieveAPIView):
         except Exception as e:
             print(e)
             return Response({"error": "topilmadi"})
+
+
+class RoomBookingListApiView(RetrieveAPIView):
+    queryset = RoomBooking.objects.all()
+    serializer_class = RoomBookingListSerializer
+
+    def get(self, *args, **kwargs):
+        id = self.kwargs.get("pk")
+        room = Room.objects.filter(id=id)
+        if room.exists():
+            room_booked = self.get_queryset().filter(Q(room=room.first().id) & Q(booked=False))
+        else:
+            raise ValueError({"error": "Topilmadi"})
+
+        serializers = self.serializer_class(room_booked, many=True)
+        return Response(serializers.data)
+
+
+class RoomBookCreateApiView(CreateAPIView):
+    queryset = RoomBooking.objects.all()
+    serializer_class = RoomBookingCreateSerializer
 
