@@ -1,3 +1,4 @@
+from django.db.models import Q
 from rest_framework import serializers
 from .models import Room, RoomBooking, Resident
 
@@ -27,6 +28,15 @@ class RoomBookingCreateSerializer(serializers.ModelSerializer):
         model = RoomBooking
         fields = ("resident", "start", "end")
 
-    # def create(self, validated_data):
-    #     print(validated_data)
-    #     return validated_data
+    def create(self, validated_data):
+
+        room = 1
+        book = RoomBooking.objects.filter(
+            Q(room_id=room),
+            Q(start__lt=validated_data["end"], end__gt=validated_data["start"]) |
+            Q(start__gte=validated_data["start"], end__lte=validated_data["end"]) |
+            Q(start__lte=validated_data["start"], end__gte=validated_data["end"])
+        ).exists()
+        if book:
+            raise serializers.ValidationError("This time is not suitable")
+        return validated_data

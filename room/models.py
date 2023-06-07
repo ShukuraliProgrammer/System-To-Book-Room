@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
 
 
@@ -36,7 +37,8 @@ class Resident(models.Model):
 
 
 class RoomBooking(models.Model):
-    resident = models.ForeignKey(Resident, on_delete=models.CASCADE, related_name="room_bookings", null=True, blank=True)
+    resident = models.ForeignKey(Resident, on_delete=models.CASCADE, related_name="room_bookings", null=True,
+                                 blank=True)
     room = models.ForeignKey(Room, on_delete=models.CASCADE, related_name="room_bookings")
     start = models.DateTimeField()
     end = models.DateTimeField()
@@ -45,6 +47,23 @@ class RoomBooking(models.Model):
     class Meta:
         verbose_name = _("Room Book")
         verbose_name_plural = _("Room Books")
+
+        constraints = [
+            models.CheckConstraint(
+                check=~Q(start__gte=models.F('end')),
+                name='start_before_end'
+            ),
+            models.CheckConstraint(
+                check=~Q(
+                    RoomBooking.objects.filter(
+                        Q(start__lt=models.F('end'), end__gt=models.F('start')) |
+                        Q(start__gte=models.F('start'), end__lte=models.F('end')) |
+                        Q(start__lte=models.F('start'), end__gte=models.F('end'))
+                    ).exists()
+                ),
+                name='no_overlapping_bookings'
+            )
+        ]
 
     def __str__(self):
         return self.room.name

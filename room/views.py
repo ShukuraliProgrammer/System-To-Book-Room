@@ -70,3 +70,6 @@ class RoomBookCreateApiView(CreateAPIView):
     queryset = RoomBooking.objects.all()
     serializer_class = RoomBookingCreateSerializer
 
+
+
+
