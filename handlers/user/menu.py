@@ -1,4 +1,3 @@
-
 from aiogram.types import Message, ReplyKeyboardMarkup
 from loader import dp
 from filters import IsUser
@@ -13,9 +12,8 @@ orders = '🚚 Zakaz'
 questions = '❓ Savol'
 
 
-
 @dp.message_handler(IsUser(), commands="menu")
-async def is_user_menu(message: Message):    
+async def is_user_menu(message: Message):
     markup = ReplyKeyboardMarkup(resize_keyboard=True, selective=True)
     markup.add(catalog)
     markup.add(balance, cart)
