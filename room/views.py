@@ -4,6 +4,7 @@ from rest_framework.filters import SearchFilter
 from rest_framework import status
 from django.db.models import Q
 from django_filters.rest_framework import DjangoFilterBackend
+from datetime import datetime, time
 
 from .serializers import RoomListSerializer, RoomBookingListSerializer, RoomBookingCreateSerializer
 from .models import Room, RoomBooking
@@ -55,17 +56,42 @@ class RoomBookingListApiView(RetrieveAPIView):
     queryset = RoomBooking.objects.all()
     serializer_class = RoomBookingListSerializer
 
-    def get(self, *args, **kwargs):
-        id = self.kwargs.get("pk")
-        room = Room.objects.filter(id=id)
-        if room.exists():
-            room_booked = self.get_queryset().filter(Q(room=room.first().id))
+    def get(self, request, *args, **kwargs):
+        room_id = self.kwargs.get('pk')
+        desired_date_str = request.GET.get('date')
+        if not desired_date_str:
+            desired_date_str = datetime.today().date().strftime('%d-%m-%Y')
 
-        else:
-            raise ValueError({"error": "Topilmadi"})
+        desired_date = datetime.strptime(str(desired_date_str), '%d-%m-%Y').date()
 
-        serializers = self.serializer_class(room_booked, many=True)
-        return Response(serializers.data)
+        start_of_day = datetime.combine(desired_date, time.min)
+        end_of_day = datetime.combine(desired_date, time.max)
+
+        overlapping_bookings = RoomBooking.objects.filter(
+            room_id=room_id,
+            start__lt=end_of_day,
+            end__gt=start_of_day
+        )
+
+        available_slots = []
+        previous_booking_end = start_of_day
+
+        for booking in overlapping_bookings:
+            if previous_booking_end.strftime('%d-%m-%Y %H:%M:%S') < booking.start.strftime('%d-%m-%Y %H:%M:%S'):
+                available_slots.append({
+                    'start': previous_booking_end.strftime('%d-%m-%Y %H:%M:%S'),
+                    'end': booking.start.strftime('%d-%m-%Y %H:%M:%S')
+                })
+
+            previous_booking_end = booking.end
+
+        if previous_booking_end.strftime('%d-%m-%Y %H:%M:%S') < end_of_day.strftime('%d-%m-%Y %H:%M:%S'):
+            available_slots.append({
+                'start': previous_booking_end.strftime('%d-%m-%Y %H:%M:%S'),
+                'end': end_of_day.strftime('%d-%m-%Y %H:%M:%S')
+            })
+
+        return Response(available_slots, status=status.HTTP_200_OK)
 
 
 class RoomBookCreateApiView(CreateAPIView):
