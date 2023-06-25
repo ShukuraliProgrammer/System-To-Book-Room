@@ -1,6 +1,7 @@
 from rest_framework.response import Response
 from rest_framework.generics import ListAPIView, RetrieveAPIView, CreateAPIView
 from rest_framework.filters import SearchFilter
+from rest_framework import status
 from django.db.models import Q
 from django_filters.rest_framework import DjangoFilterBackend
 
@@ -47,7 +48,7 @@ class RoomDetailApiView(RetrieveAPIView):
             return Response(serializers.data)
         except Exception as e:
             print(e)
-            return Response({"error": "topilmadi"})
+            return Response({"error": "topilmadi"},status=status.HTTP_404_NOT_FOUND)
 
 
 class RoomBookingListApiView(RetrieveAPIView):
@@ -58,7 +59,8 @@ class RoomBookingListApiView(RetrieveAPIView):
         id = self.kwargs.get("pk")
         room = Room.objects.filter(id=id)
         if room.exists():
-            room_booked = self.get_queryset().filter(Q(room=room.first().id) & Q(booked=False))
+            room_booked = self.get_queryset().filter(Q(room=room.first().id))
+            
         else:
             raise ValueError({"error": "Topilmadi"})
 

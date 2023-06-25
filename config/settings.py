@@ -10,7 +10,7 @@ SECRET_KEY = "django-insecure-y_-r#+1v2ub8e)cbx53xxjr(s$-l1sai_3+zdc3z#b1h-chdr(
 DEBUG = True
 
 # Allowed Hosts to run project
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['shukuraliprogrammer.jprq.live', 'localhost', '127.0.0.1']
 
 # Application definition
 INSTALLED_APPS = [
@@ -28,6 +28,7 @@ INSTALLED_APPS = [
     # THIRD PARTY PACKAGES
     "rest_framework",
     "django_filters",
+    'coverage'
 
 ]
 
@@ -97,7 +98,7 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
     'PAGE_SIZE': 100,
-    'DATETIME_FORMAT':'%Y-%m-%d %H:%M:%S',
+    'DATETIME_FORMAT': '%d-%m-%Y %H:%M:%S',
 }
 
 # Internationalization
