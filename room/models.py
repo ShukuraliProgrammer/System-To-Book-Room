@@ -53,14 +53,6 @@ class RoomBooking(models.Model):
                 check=~Q(start__gte=models.F('end')),
                 name='start_before_end'
             ),
-            models.CheckConstraint(
-                check=
-                        Q(start__lt=models.F('end'), end__gt=models.F('start')) |
-                        Q(start__gte=models.F('start'), end__lte=models.F('end')) |
-                        Q(start__lte=models.F('start'), end__gte=models.F('end'))
-                ,
-                name='no_overlapping_bookings'
-            )
         ]
 
     def __str__(self):

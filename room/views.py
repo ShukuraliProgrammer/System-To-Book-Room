@@ -14,8 +14,8 @@ class RoomListApiView(ListAPIView):
     serializer_class = RoomListSerializer
     queryset = Room.objects.all()
     filter_backends = [SearchFilter, DjangoFilterBackend]
-    filterset_fields = ("type", )
-    search_fields=["name", "id"]
+    filterset_fields = ("type",)
+    search_fields = ["name", "id"]
 
     def get(self, request, *args, **kwargs):
         search_param = self.request.query_params.get("search")
@@ -48,7 +48,7 @@ class RoomDetailApiView(RetrieveAPIView):
             return Response(serializers.data)
         except Exception as e:
             print(e)
-            return Response({"error": "topilmadi"},status=status.HTTP_404_NOT_FOUND)
+            return Response({"error": "topilmadi"}, status=status.HTTP_404_NOT_FOUND)
 
 
 class RoomBookingListApiView(RetrieveAPIView):
@@ -60,7 +60,7 @@ class RoomBookingListApiView(RetrieveAPIView):
         room = Room.objects.filter(id=id)
         if room.exists():
             room_booked = self.get_queryset().filter(Q(room=room.first().id))
-            
+
         else:
             raise ValueError({"error": "Topilmadi"})
 
@@ -72,6 +72,13 @@ class RoomBookCreateApiView(CreateAPIView):
     queryset = RoomBooking.objects.all()
     serializer_class = RoomBookingCreateSerializer
 
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        return Response(data={"message": "xona muvaffaqiyatli band qilindi"}, status=status.HTTP_201_CREATED)
 
-
-
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context["room_id"] = self.kwargs.get("pk")
+        return context

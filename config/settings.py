@@ -70,8 +70,12 @@ WSGI_APPLICATION = "config.wsgi.application"
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": "system-booking",
+        "USER": "postgres",
+        "PORT": 5432,
+        "PASSWORD": "571632sav_",
+        "HOST": "localhost"
     }
 }
 
@@ -99,6 +103,8 @@ REST_FRAMEWORK = {
     'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
     'PAGE_SIZE': 100,
     'DATETIME_FORMAT': '%d-%m-%Y %H:%M:%S',
+    'DATE_INPUT_FORMATS': ['%d-%m-%Y %H:%M:%S'],
+    'EXCEPTION_HANDLER': 'room.exception_handler.custom_exception_handler'
 }
 
 # Internationalization
